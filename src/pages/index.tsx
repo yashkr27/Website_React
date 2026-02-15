@@ -3,12 +3,14 @@ import Link from "next/link";
 import { GetServerSideProps } from "next";
 import { getAllCountries, Country } from "@/lib/data";
 import SEO from "@/components/SEO";
-import { Search, Globe, TrendingUp, Info, ArrowRight } from "lucide-react";
+import { Search, Globe, TrendingUp, Info, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { m, LazyMotion, domAnimation, AnimatePresence } from "framer-motion";
 
 type HomeProps = {
   initialCountries: Country[];
 }
+
+const ITEMS_PER_PAGE = 12;
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   const initialCountries = await getAllCountries();
@@ -21,11 +23,11 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
 
 /**
  * HomePage Component
- * Displays a list of countries with filtering capabilities.
- * Optimized for Lighthouse Performance (Mobile > 75) and SEO.
+ * Displays a list of countries with filtering capabilities and pagination.
  */
 export default function Home({ initialCountries }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredCountries = useMemo(() => {
     const query = searchQuery.toLowerCase();
@@ -34,7 +36,6 @@ export default function Home({ initialCountries }: HomeProps) {
       country.region.toLowerCase().includes(query)
     );
 
-    // Sort to prioritize Exact/Start matches in Name over matches in Region
     return filtered.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
@@ -43,6 +44,18 @@ export default function Home({ initialCountries }: HomeProps) {
       return bStarts - aStarts;
     });
   }, [searchQuery, initialCountries]);
+
+  const totalPages = Math.ceil(filteredCountries.length / ITEMS_PER_PAGE);
+
+  const paginatedCountries = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredCountries.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredCountries, currentPage]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to first page on search
+  };
 
   const websiteSchema = {
     "@context": "https://schema.org",
