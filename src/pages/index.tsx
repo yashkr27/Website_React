@@ -28,10 +28,20 @@ export default function Home({ initialCountries }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredCountries = useMemo(() => {
-    return (initialCountries || []).filter((country) =>
-      country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      country.region.toLowerCase().includes(searchQuery.toLowerCase())
+    const query = searchQuery.toLowerCase();
+    const filtered = (initialCountries || []).filter((country: Country) =>
+      country.name.toLowerCase().includes(query) ||
+      country.region.toLowerCase().includes(query)
     );
+
+    // Sort to prioritize Exact/Start matches in Name over matches in Region
+    return filtered.sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      const aStarts = aName.startsWith(query) ? 1 : 0;
+      const bStarts = bName.startsWith(query) ? 1 : 0;
+      return bStarts - aStarts;
+    });
   }, [searchQuery, initialCountries]);
 
   const websiteSchema = {

@@ -15,24 +15,26 @@ export type Country = {
 function mapCountry(item: any): Country {
     let region = item.region?.value || "N/A";
 
-    // Data Normalization for Regions
-    // World Bank often includes redundant country lists or exclusion notes in region names
-    const regionCleaningMap: Record<string, string> = {
-        "Middle East & North Africa": "Middle East & North Africa",
-        "Middle East, North Africa, Afghanistan & Pakistan": "Middle East & South Asia",
-        "Latin America & Caribbean ": "Latin America & Caribbean",
-        "East Asia & Pacific": "East Asia & Pacific",
-        "Europe & Central Asia": "Europe & Central Asia",
-        "South Asia": "South Asia",
-        "Sub-Saharan Africa ": "Sub-Saharan Africa",
-        "North America": "North America"
-    };
-
     // Strip " (excluding high income)" and similar suffixes commonly found in WB data
     region = region.split(' (')[0];
 
-    // Apply mapping if it exists in our cleaner list
-    region = regionCleaningMap[region] || region;
+    // Data Normalization for Regions
+    // More robust cleaning to prevent search pollution from country names in regions
+    const lowerRegion = region.toLowerCase();
+
+    if (lowerRegion.includes("afghanistan") || lowerRegion.includes("pakistan") || lowerRegion.includes("south asia")) {
+        region = "Middle East & South Asia";
+    } else if (lowerRegion.includes("latin america")) {
+        region = "Latin America & Caribbean";
+    } else if (lowerRegion.includes("middle east") || lowerRegion.includes("north africa")) {
+        region = "Middle East & North Africa";
+    } else if (lowerRegion.includes("sub-saharan africa")) {
+        region = "Sub-Saharan Africa";
+    } else if (lowerRegion.includes("east asia") || lowerRegion.includes("pacific")) {
+        region = "East Asia & Pacific";
+    } else if (lowerRegion.includes("europe") || lowerRegion.includes("central asia")) {
+        region = "Europe & Central Asia";
+    }
 
     return {
         id: item.id,
