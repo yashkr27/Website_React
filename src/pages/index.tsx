@@ -21,8 +21,8 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   };
 };
 
-/**
- * HomePage Component
+/**S
+ homePage Component
  * Displays a list of countries with filtering capabilities and pagination.
  */
 export default function Home({ initialCountries }: HomeProps) {
@@ -115,7 +115,7 @@ export default function Home({ initialCountries }: HomeProps) {
                   placeholder="Search by country or region..."
                   className="w-full pl-14 pr-6 py-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all font-medium"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleSearchChange}
                 />
               </div>
             </m.div>
@@ -129,7 +129,7 @@ export default function Home({ initialCountries }: HomeProps) {
                 <Globe className="text-blue-600" size={28} aria-hidden="true" />
                 Featured Profiles
               </h2>
-              <p className="text-slate-500 font-medium">{filteredCountries.length} active country reports</p>
+              <p className="text-slate-500 font-medium">Showing {paginatedCountries.length} of {filteredCountries.length} countries</p>
             </div>
 
             <div className="flex gap-3">
@@ -144,9 +144,9 @@ export default function Home({ initialCountries }: HomeProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16">
             <AnimatePresence mode="popLayout">
-              {filteredCountries.map((country: Country, index: number) => (
+              {paginatedCountries.map((country: Country, index: number) => (
                 <m.div
                   key={country.id}
                   layout
@@ -192,6 +192,57 @@ export default function Home({ initialCountries }: HomeProps) {
               ))}
             </AnimatePresence>
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-8 border-t border-slate-200">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl font-bold text-slate-600 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 hover:border-blue-400 hover:text-blue-600 shadow-sm"
+              >
+                <ChevronLeft size={20} />
+                Previous
+              </button>
+
+              <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`w-10 h-10 rounded-xl font-bold transition-all ${currentPage === pageNum
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+                        : "text-slate-500 hover:bg-white hover:text-blue-600"
+                        }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl font-bold text-slate-600 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 hover:border-blue-400 hover:text-blue-600 shadow-sm"
+              >
+                Next
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          )}
 
           {filteredCountries.length === 0 && (
             <m.div key="no-results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24 bg-white rounded-[2rem] border border-dashed border-slate-300">
