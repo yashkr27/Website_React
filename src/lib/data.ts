@@ -1,12 +1,10 @@
 // src/lib/data.ts
+import { Country } from "./types";
+import { WORLD_BANK_API_BASE, COUNTRIES_PER_PAGE_API } from "./constants";
+import { countries as fallbackCountries } from "./countries";
 
-export type Country = {
-    id: string;
-    name: string;
-    region: string;
-    capital: string;
-    incomeLevel: string;
-};
+export type { Country };
+export const countries = fallbackCountries;
 
 /**
  * Maps World Bank API response to our internal Country type.
@@ -19,7 +17,6 @@ function mapCountry(item: any): Country {
     region = region.split(' (')[0];
 
     // Data Normalization for Regions
-    // More robust cleaning to prevent search pollution from country names in regions
     const lowerRegion = region.toLowerCase();
 
     if (lowerRegion.includes("afghanistan") || lowerRegion.includes("pakistan") || lowerRegion.includes("south asia")) {
@@ -47,10 +44,11 @@ function mapCountry(item: any): Country {
 
 /**
  * Fetches a list of countries from the World Bank API.
+ * Uses local fallback if API fails.
  */
 export async function getAllCountries(): Promise<Country[]> {
     try {
-        const res = await fetch("https://api.worldbank.org/v2/country?format=json&per_page=300");
+        const res = await fetch(`${WORLD_BANK_API_BASE}?format=json&per_page=${COUNTRIES_PER_PAGE_API}`);
         const data = await res.json();
 
         // Data structure: [metadata, countryArray]
@@ -59,31 +57,29 @@ export async function getAllCountries(): Promise<Country[]> {
                 .filter((item: any) => item.region.id !== "NA") // Filter out aggregates/regions
                 .map(mapCountry);
         }
-        return [];
+        return fallbackCountries;
     } catch (error) {
-        console.error("Error fetching countries:", error);
-        return [];
+        console.error("Error fetching countries, using fallback:", error);
+        return fallbackCountries;
     }
 }
 
 /**
- * Fetches details for a specific country by its 3-letter ID (e.g., "IND").
+ * Fetches details for a specific country by its ID.
  */
 export async function getCountryById(id: string): Promise<Country | null> {
     try {
-        const res = await fetch(`https://api.worldbank.org/v2/country/${id}?format=json`);
+        const res = await fetch(`${WORLD_BANK_API_BASE}/${id}?format=json`);
         const data = await res.json();
 
         if (Array.isArray(data) && data[1] && data[1][0]) {
             return mapCountry(data[1][0]);
         }
-        return null;
+
+        // Final fallback: check local data if API fails to find it
+        return fallbackCountries.find(c => c.id === id) || null;
     } catch (error) {
-        console.error(`Error fetching country ${id}:`, error);
-        return null;
+        console.error(`Error fetching country ${id}, searching local fallback:`, error);
+        return fallbackCountries.find(c => c.id === id) || null;
     }
 }
-
-// Keep the static exported array for initial backward compatibility if needed, 
-// but we'll transition components to use the async functions.
-export const countries: Country[] = []; 

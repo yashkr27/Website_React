@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { GetServerSideProps } from "next";
 import { getAllCountries, Country } from "@/lib/data";
+import { ITEMS_PER_PAGE } from "@/lib/constants";
 import SEO from "@/components/SEO";
 import { Search, Globe, TrendingUp, Info, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { m, LazyMotion, domAnimation, AnimatePresence } from "framer-motion";
@@ -9,8 +10,6 @@ import { m, LazyMotion, domAnimation, AnimatePresence } from "framer-motion";
 type HomeProps = {
   initialCountries: Country[];
 }
-
-const ITEMS_PER_PAGE = 12;
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   const initialCountries = await getAllCountries();
