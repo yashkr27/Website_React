@@ -10,12 +10,34 @@ export type Country = {
 
 /**
  * Maps World Bank API response to our internal Country type.
+ * Includes normalization for regional names to ensure cleaner SEO presentation.
  */
 function mapCountry(item: any): Country {
+    let region = item.region?.value || "N/A";
+
+    // Data Normalization for Regions
+    // World Bank often includes redundant country lists or exclusion notes in region names
+    const regionCleaningMap: Record<string, string> = {
+        "Middle East & North Africa": "Middle East & North Africa",
+        "Middle East, North Africa, Afghanistan & Pakistan": "Middle East & South Asia",
+        "Latin America & Caribbean ": "Latin America & Caribbean",
+        "East Asia & Pacific": "East Asia & Pacific",
+        "Europe & Central Asia": "Europe & Central Asia",
+        "South Asia": "South Asia",
+        "Sub-Saharan Africa ": "Sub-Saharan Africa",
+        "North America": "North America"
+    };
+
+    // Strip " (excluding high income)" and similar suffixes commonly found in WB data
+    region = region.split(' (')[0];
+
+    // Apply mapping if it exists in our cleaner list
+    region = regionCleaningMap[region] || region;
+
     return {
         id: item.id,
         name: item.name,
-        region: item.region?.value || "N/A",
+        region: region,
         capital: item.capitalCity || "N/A",
         incomeLevel: item.incomeLevel?.value || "N/A",
     };
