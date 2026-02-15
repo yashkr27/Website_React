@@ -1,41 +1,38 @@
-/**
- * This file contains a small, static subset of country-level
- * economic data.
- *
- * The information is derived from the World Bank Open Data API.
- * Only three countries are included to keep the project focused
- * on demonstrating SEO concepts rather than data scale.
- *
- * The full API-based reference implementation can be found in
- * `world_bank.ts`.
- */
+// src/lib/data.ts
 
-export type CountryData = {
+export type Country = {
+    id: string;
     name: string;
     region: string;
     capital: string;
     incomeLevel: string;
 };
 
-export const countries: Record<string, CountryData> = {
-    india: {
+/**
+ * Static country dataset.
+ * Used to generate deterministic, SEO-friendly pages.
+ * Data is derived from the World Bank country classifications.
+ */
+export const countries: Country[] = [
+    {
+        id: "IND",
         name: "India",
         region: "South Asia",
         capital: "New Delhi",
-        incomeLevel: "Lower middle income",
+        incomeLevel: "Lower Middle Income",
     },
-
-    usa: {
+    {
+        id: "USA",
         name: "United States",
         region: "North America",
         capital: "Washington, D.C.",
-        incomeLevel: "High income",
+        incomeLevel: "High Income",
     },
-
-    argentina: {
+    {
+        id: "ARG",
         name: "Argentina",
         region: "Latin America & Caribbean",
         capital: "Buenos Aires",
-        incomeLevel: "Upper middle income",
+        incomeLevel: "Upper Middle Income",
     },
-};
+];

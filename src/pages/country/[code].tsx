@@ -1,17 +1,17 @@
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { fetchCountryByCode, Country } from "@/lib/worldBank";
+import { countries, Country } from "@/lib/data";
 
 type CountryPageProps = {
     country: Country;
 };
 
-export const getServerSideProps: GetServerSideProps<
-    CountryPageProps
-> = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps<CountryPageProps> = async ({
+    params,
+}) => {
     const code = params?.code as string;
-    const country = await fetchCountryByCode(code);
+    const country = countries.find((c) => c.id === code);
 
     if (!country) {
         return { notFound: true };
@@ -26,11 +26,10 @@ export const getServerSideProps: GetServerSideProps<
 
 export default function CountryPage({ country }: CountryPageProps) {
     const title = `${country.name} Economic Overview`;
-    const description = `${country.name} economic overview including capital city, region, and income classification based on World Bank data.`;
+    const description = `${country.name} economic overview including capital city, region, and income classification.`;
 
     return (
         <>
-            {/* SEO */}
             <Head>
                 <title>{title}</title>
                 <meta name="description" content={description} />
@@ -39,7 +38,6 @@ export default function CountryPage({ country }: CountryPageProps) {
                 <meta property="og:type" content="website" />
             </Head>
 
-            {/* JSON-LD */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -52,37 +50,28 @@ export default function CountryPage({ country }: CountryPageProps) {
                 }}
             />
 
-            {/* UI */}
             <div className="min-h-screen bg-neutral-900 text-neutral-100">
                 <main className="mx-auto max-w-2xl px-6 py-10">
-                    <Link
-                        href="/"
-                        className="text-sm text-blue-400 hover:underline"
-                    >
+                    <Link href="/" className="text-sm text-blue-400 hover:underline">
                         ← Back to country list
                     </Link>
 
-                    <div className="mt-6 rounded-xl border border-neutral-700 bg-neutral-800 p-6">
-                        <h1 className="text-3xl font-bold mb-4">
-                            {country.name}
-                        </h1>
+                    <h1 className="text-3xl font-bold mt-4 mb-6">
+                        {country.name}
+                    </h1>
 
-                        <div className="divide-y divide-neutral-700">
-                            <div className="py-3 flex justify-between">
-                                <span className="text-neutral-400">Region</span>
-                                <span>{country.region.value}</span>
-                            </div>
-
-                            <div className="py-3 flex justify-between">
-                                <span className="text-neutral-400">Capital</span>
-                                <span>{country.capitalCity || "N/A"}</span>
-                            </div>
-
-                            <div className="py-3 flex justify-between">
-                                <span className="text-neutral-400">Income Level</span>
-                                <span>{country.incomeLevel.value}</span>
-                            </div>
-                        </div>
+                    <div className="space-y-3 text-lg">
+                        <p>
+                            <span className="font-semibold">Region:</span> {country.region}
+                        </p>
+                        <p>
+                            <span className="font-semibold">Capital:</span>{" "}
+                            {country.capital || "N/A"}
+                        </p>
+                        <p>
+                            <span className="font-semibold">Income Level:</span>{" "}
+                            {country.incomeLevel}
+                        </p>
                     </div>
                 </main>
             </div>
