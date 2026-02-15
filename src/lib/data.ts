@@ -9,51 +9,57 @@ export type Country = {
 };
 
 /**
- * Static country dataset.
- * Used to generate deterministic, SEO-friendly pages.
- * Data is derived from the World Bank country classifications.
+ * Maps World Bank API response to our internal Country type.
  */
-export const countries: Country[] = [
-    {
-        id: "IND",
-        name: "India",
-        region: "South Asia",
-        capital: "New Delhi",
-        incomeLevel: "Lower Middle Income",
-    },
-    {
-        id: "USA",
-        name: "United States",
-        region: "North America",
-        capital: "Washington, D.C.",
-        incomeLevel: "High Income",
-    },
-    {
-        id: "ARG",
-        name: "Argentina",
-        region: "Latin America & Caribbean",
-        capital: "Buenos Aires",
-        incomeLevel: "Upper Middle Income",
-    },
-    {
-        id: "BRA",
-        name: "Brazil",
-        region: "South America",
-        capital: "Brasília",
-        incomeLevel: "Upper Middle Income",
-    },
-    {
-        id: "CAN",
-        name: "Canada",
-        region: "North America",
-        capital: "Ottawa",
-        incomeLevel: "High Income",
-    },
-    {
-        id: "ISR",
-        name: "Israel",
-        region: "Middle East",
-        capital: "Jerusalem",
-        incomeLevel: "High Income",
-    },
-];
+function mapCountry(item: any): Country {
+    return {
+        id: item.id,
+        name: item.name,
+        region: item.region?.value || "N/A",
+        capital: item.capitalCity || "N/A",
+        incomeLevel: item.incomeLevel?.value || "N/A",
+    };
+}
+
+/**
+ * Fetches a list of countries from the World Bank API.
+ */
+export async function getAllCountries(): Promise<Country[]> {
+    try {
+        const res = await fetch("https://api.worldbank.org/v2/country?format=json&per_page=300");
+        const data = await res.json();
+
+        // Data structure: [metadata, countryArray]
+        if (Array.isArray(data) && data[1]) {
+            return data[1]
+                .filter((item: any) => item.region.id !== "NA") // Filter out aggregates/regions
+                .map(mapCountry);
+        }
+        return [];
+    } catch (error) {
+        console.error("Error fetching countries:", error);
+        return [];
+    }
+}
+
+/**
+ * Fetches details for a specific country by its 3-letter ID (e.g., "IND").
+ */
+export async function getCountryById(id: string): Promise<Country | null> {
+    try {
+        const res = await fetch(`https://api.worldbank.org/v2/country/${id}?format=json`);
+        const data = await res.json();
+
+        if (Array.isArray(data) && data[1] && data[1][0]) {
+            return mapCountry(data[1][0]);
+        }
+        return null;
+    } catch (error) {
+        console.error(`Error fetching country ${id}:`, error);
+        return null;
+    }
+}
+
+// Keep the static exported array for initial backward compatibility if needed, 
+// but we'll transition components to use the async functions.
+export const countries: Country[] = []; 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { GetServerSideProps } from "next";
 import Link from "next/link";
-import { countries, Country } from "@/lib/data";
+import { getCountryById, Country } from "@/lib/data";
 import SEO from "@/components/SEO";
 import { ArrowLeft, MapPin, Landmark, Wallet, ShieldCheck, ExternalLink, Share2 } from "lucide-react";
 import { m, LazyMotion, domAnimation } from "framer-motion";
@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps<CountryPageProps> = async ({
     params,
 }) => {
     const code = params?.code as string;
-    const country = countries.find((c) => c.id === code);
+    const country = await getCountryById(code);
 
     if (!country) {
         return { notFound: true };

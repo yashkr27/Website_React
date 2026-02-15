@@ -1,24 +1,38 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { countries } from "@/lib/data";
+import { GetServerSideProps } from "next";
+import { getAllCountries, Country } from "@/lib/data";
 import SEO from "@/components/SEO";
 import { Search, Globe, TrendingUp, Info, ArrowRight } from "lucide-react";
 import { m, LazyMotion, domAnimation, AnimatePresence } from "framer-motion";
+
+type HomeProps = {
+  initialCountries: Country[];
+}
+
+export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+  const initialCountries = await getAllCountries();
+  return {
+    props: {
+      initialCountries,
+    },
+  };
+};
 
 /**
  * HomePage Component
  * Displays a list of countries with filtering capabilities.
  * Optimized for Lighthouse Performance (Mobile > 75) and SEO.
  */
-export default function Home() {
+export default function Home({ initialCountries }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredCountries = useMemo(() => {
-    return countries.filter((country) =>
+    return (initialCountries || []).filter((country) =>
       country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       country.region.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, initialCountries]);
 
   const websiteSchema = {
     "@context": "https://schema.org",
@@ -109,7 +123,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <AnimatePresence mode="popLayout">
-              {filteredCountries.map((country, index) => (
+              {filteredCountries.map((country: Country, index: number) => (
                 <m.div
                   key={country.id}
                   layout
