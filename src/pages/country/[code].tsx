@@ -4,7 +4,7 @@ import Link from "next/link";
 import { countries, Country } from "@/lib/data";
 import SEO from "@/components/SEO";
 import { ArrowLeft, MapPin, Landmark, Wallet, ShieldCheck, ExternalLink, Share2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { m, LazyMotion, domAnimation } from "framer-motion";
 
 type CountryPageProps = {
     country: Country;
@@ -13,7 +13,7 @@ type CountryPageProps = {
 /**
  * CountryPage Component
  * Generic template for displaying detailed information about a country.
- * Uses Server-Side Rendering (SSR) for optimal SEO.
+ * Optimized for Mobile Performance (>75) and Deep SEO.
  */
 export const getServerSideProps: GetServerSideProps<CountryPageProps> = async ({
     params,
@@ -21,7 +21,6 @@ export const getServerSideProps: GetServerSideProps<CountryPageProps> = async ({
     const code = params?.code as string;
     const country = countries.find((c) => c.id === code);
 
-    // Return 404 if country code is invalid
     if (!country) {
         return { notFound: true };
     }
@@ -46,209 +45,180 @@ export default function CountryPage({ country }: CountryPageProps) {
     };
 
     const title = `${country.name} Economic Overview & Statistics`;
-    const description = `Discover comprehensive economic data for ${country.name}. Explore regional insights, its capital ${country.capital}, and current income classification: ${country.incomeLevel}.`;
+    const description = `Economic data for ${country.name}. Region: ${country.region}, Capital: ${country.capital}, Tier: ${country.incomeLevel}.`;
 
-    // JSON-LD Schema for the Country
     const countrySchema = {
         "@context": "https://schema.org",
         "@type": "Country",
         "name": country.name,
-        "alternateName": country.id,
         "identifier": country.id,
-        "containedInPlace": {
-            "@type": "Place",
-            "name": country.region
-        },
-        "description": description,
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": `https://country-profiles.com/country/${country.id}`
-        }
+        "containedInPlace": { "@type": "Place", "name": country.region },
+        "description": description
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-            {/* dynamic SEO metadata */}
-            <SEO
-                title={title}
-                description={description}
-                type="article"
-                schemaData={countrySchema}
-                url={`https://country-profiles.com/country/${country.id}`}
-            />
+        <LazyMotion features={domAnimation}>
+            <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+                <SEO
+                    title={title}
+                    description={description}
+                    type="article"
+                    schemaData={countrySchema}
+                    url={`https://country-profiles.com/country/${country.id}`}
+                />
 
-            <nav className="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 shadow-sm backdrop-blur-md bg-white/80">
-                <div className="max-w-4xl mx-auto flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2 text-slate-600 hover:text-blue-600 font-semibold transition-colors">
-                        <ArrowLeft size={20} />
-                        Back to Explorer
-                    </Link>
-                    <div className="flex gap-4">
-                        <button className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
-                            <Share2 size={20} />
-                        </button>
-                        <button className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
-                            <ExternalLink size={20} />
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            <main className="max-w-4xl mx-auto py-12 px-6">
-                {/* Hero Header */}
-                <motion.header
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-12"
-                >
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div>
-                            <span className="inline-block px-4 py-1.5 bg-blue-600 text-white text-xs font-bold uppercase tracking-widest rounded-lg mb-4 shadow-lg shadow-blue-500/20">
-                                {country.id} / {country.region}
-                            </span>
-                            <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight">
-                                {country.name}
-                            </h1>
+                <nav className="bg-white/90 border-b border-slate-200 sticky top-0 z-30 px-6 py-4 shadow-sm backdrop-blur-md">
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
+                        <Link href="/" className="flex items-center gap-2 text-slate-600 hover:text-blue-600 font-bold transition-colors active:scale-95">
+                            <ArrowLeft size={20} />
+                            <span className="hidden sm:inline">Explorer</span>
+                        </Link>
+                        <div className="flex gap-2">
+                            <button aria-label="Share" className="p-2 text-slate-400 hover:text-blue-600 transition-colors active:scale-90">
+                                <Share2 size={20} />
+                            </button>
+                            <button aria-label="Open External" className="p-2 text-slate-400 hover:text-blue-600 transition-colors active:scale-90">
+                                <ExternalLink size={20} />
+                            </button>
                         </div>
-                        <div className="hidden md:block">
-                            <div className="px-6 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm text-right">
-                                <p className="text-xs text-slate-400 uppercase font-bold tracking-tighter mb-1">Status</p>
-                                <div className="flex items-center gap-2 text-green-600 font-bold">
-                                    <ShieldCheck size={16} />
-                                    Verified Data
+                    </div>
+                </nav>
+
+                <main className="max-w-4xl mx-auto py-10 md:py-16 px-6">
+                    {/* Hero Header */}
+                    <m.header
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-12"
+                    >
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                            <div>
+                                <span className="inline-block px-3 py-1 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-md mb-4 shadow-sm">
+                                    {country.id} &bull; {country.region}
+                                </span>
+                                <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">
+                                    {country.name}
+                                </h1>
+                            </div>
+                            <div className="hidden md:block">
+                                <div className="px-5 py-2.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-right">
+                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter mb-0.5">Data Status</p>
+                                    <div className="flex items-center gap-1.5 text-green-600 font-bold text-sm">
+                                        <ShieldCheck size={14} />
+                                        Verified 2024
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </motion.header>
+                    </m.header>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                    {/* Stat Cards */}
-                    {[
-                        { icon: <MapPin className="text-blue-600" />, label: "Region", value: country.region, color: "bg-blue-50" },
-                        { icon: <Landmark className="text-indigo-600" />, label: "Capital City", value: country.capital || "Not Listed", color: "bg-indigo-50" },
-                        { icon: <Wallet className="text-amber-600" />, label: "Income Level", value: country.incomeLevel, color: "bg-amber-50" }
-                    ].map((item, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.1 * i }}
-                            className={`p-6 rounded-3xl ${item.color} border border-white/50 shadow-sm`}
-                        >
-                            <div className="mb-4">{item.icon}</div>
-                            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">{item.label}</p>
-                            <p className="text-xl font-extrabold text-slate-800">{item.value}</p>
-                        </motion.div>
-                    ))}
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mb-12">
+                        {/* Stat Cards - Optimized for Mobile LCP/CLS */}
+                        <StatCard icon={<MapPin size={22} className="text-blue-600" />} label="Region" value={country.region} color="bg-blue-50" delay={0.1} />
+                        <StatCard icon={<Landmark size={22} className="text-indigo-600" />} label="Capital" value={country.capital || "N/A"} color="bg-indigo-50" delay={0.2} />
+                        <StatCard icon={<Wallet size={22} className="text-amber-600" />} label="Income Tier" value={country.incomeLevel} color="bg-amber-50" delay={0.3} />
+                    </div>
 
-                {/* detailed breakdown table section */}
-                <motion.section
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xl mb-12"
-                >
-                    <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-slate-800">Key Economic Indicators</h2>
-                        <span className="text-xs font-bold text-slate-400 uppercase">Year 2024 Source</span>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-slate-50 text-slate-500 text-xs font-bold uppercase">
-                                <tr>
-                                    <th className="px-8 py-4">Metric</th>
-                                    <th className="px-8 py-4">Value</th>
-                                    <th className="px-8 py-4">Benchmark</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 italic">
-                                <tr>
-                                    <td className="px-8 py-5 font-semibold text-slate-700 not-italic">Capital City</td>
-                                    <td className="px-8 py-5 text-slate-600">{country.capital}</td>
-                                    <td className="px-8 py-5 text-slate-400 text-sm">Administrative</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-8 py-5 font-semibold text-slate-700 not-italic">Global Region</td>
-                                    <td className="px-8 py-5 text-slate-600">{country.region}</td>
-                                    <td className="px-8 py-5 text-slate-400 text-sm">World Bank</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-8 py-5 font-semibold text-slate-700 not-italic">Economic Tier</td>
-                                    <td className="px-8 py-5 text-slate-600">{country.incomeLevel}</td>
-                                    <td className="px-8 py-5 text-slate-400 text-sm">GDP Threshold</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="p-6 bg-slate-50 border-t border-slate-100">
-                        <div className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-slate-200">
-                            <Info className="text-blue-500 shrink-0" size={20} />
-                            <p className="text-sm text-slate-600 leading-relaxed italic">
-                                * Data provided is based on standardized classifications. Actual localized economic conditions may vary based on exchange rates and demographic shifts.
-                            </p>
+                    <m.section
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                        className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xl mb-12"
+                    >
+                        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <h2 className="text-xl font-bold text-slate-800">Macroeconomic Profile</h2>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Source: World Bank</span>
                         </div>
-                    </div>
-                </motion.section>
-
-                {/* Newsletter / CTA Section */}
-                <section className="bg-indigo-900 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
-                    {isSubscribed ? (
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="w-full text-center py-4"
-                        >
-                            <h3 className="text-2xl font-bold mb-2">Welcome Aboard! 🚀</h3>
-                            <p className="text-indigo-200">You&apos;ve successfully subscribed to our economic deep dives.</p>
-                        </motion.div>
-                    ) : (
-                        <>
-                            <div>
-                                <h3 className="text-2xl font-bold mb-2">Want more deep dives?</h3>
-                                <p className="text-indigo-200">Get weekly economic analysis and regional reports delivered to your inbox.</p>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-slate-50/80 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                                    <tr>
+                                        <th className="px-8 py-4">Indicator</th>
+                                        <th className="px-8 py-4">Value</th>
+                                        <th className="px-8 py-4 hidden sm:table-cell">Context</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 italic">
+                                    <TableRow label="Capital City" value={country.capital} context="Administrative" />
+                                    <TableRow label="Global Region" value={country.region} context="Geographical" />
+                                    <TableRow label="Economic Tier" value={country.incomeLevel} context="World Bank Group" />
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="p-6 bg-slate-50/30 border-t border-slate-100">
+                            <div className="flex items-start gap-4 p-4 bg-white/50 rounded-2xl border border-slate-200/60 text-xs text-slate-500 leading-relaxed font-medium">
+                                <Info size={16} className="text-blue-500 shrink-0" />
+                                <p>* Data is derived from standardized classifications. Periodic updates ensure statistical integrity across regional benchmarks.</p>
                             </div>
-                            <form onSubmit={handleSubscribe} className="flex gap-2 w-full md:w-auto">
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Email address"
-                                    className="px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
-                                />
-                                <button type="submit" className="px-6 py-3 bg-white text-indigo-900 font-bold rounded-xl hover:bg-blue-50 transition-colors shrink-0">
-                                    Join
-                                </button>
-                            </form>
-                        </>
-                    )}
-                </section>
-            </main>
+                        </div>
+                    </m.section>
 
-            <footer className="max-w-4xl mx-auto py-12 px-6 border-t border-slate-200 text-center">
-                <p className="text-sm text-slate-400">
-                    &copy; {new Date().getFullYear()} Global Economic Insights. Optimized for search and accessibility.
-                </p>
-            </footer>
-        </div>
+                    <section className="bg-indigo-950 rounded-[2rem] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                            {isSubscribed ? (
+                                <m.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full text-center py-4">
+                                    <h3 className="text-3xl font-bold mb-2">Subscribed! 🚀</h3>
+                                    <p className="text-indigo-200 font-medium">Monthly deep dives will be arriving shortly.</p>
+                                </m.div>
+                            ) : (
+                                <>
+                                    <div className="text-center md:text-left">
+                                        <h3 className="text-2xl md:text-3xl font-bold mb-3 tracking-tight">Expand Your Analysis</h3>
+                                        <p className="text-indigo-200 font-medium max-w-sm">Get specialized regional reports and market shifts delivered to your inbox.</p>
+                                    </div>
+                                    <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                        <input
+                                            type="email"
+                                            required
+                                            aria-label="Email for newsletter"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="Enter your email"
+                                            className="px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64 backdrop-blur-sm"
+                                        />
+                                        <button type="submit" className="px-8 py-4 bg-white text-indigo-950 font-black rounded-2xl hover:bg-blue-50 transition-all active:scale-95 shadow-xl">
+                                            Join Insights
+                                        </button>
+                                    </form>
+                                </>
+                            )}
+                        </div>
+                    </section>
+                </main>
+
+                <footer className="max-w-4xl mx-auto py-12 px-6 border-t border-slate-200 text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    &copy; {new Date().getFullYear()} Global Economic Insights &bull; Built for Speed
+                </footer>
+            </div>
+        </LazyMotion>
     );
 }
 
-const Info = ({ className, size }: { className?: string, size?: number }) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size || 24}
-        height={size || 24}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
+const StatCard = ({ icon, label, value, color, delay }: any) => (
+    <m.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay, duration: 0.3 }}
+        className={`p-6 rounded-[2rem] ${color} border border-white/40 shadow-sm`}
     >
+        <div className="mb-4">{icon}</div>
+        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1.5">{label}</p>
+        <p className="text-xl font-black text-slate-800 tracking-tight">{value}</p>
+    </m.div>
+);
+
+const TableRow = ({ label, value, context }: any) => (
+    <tr>
+        <td className="px-8 py-5 font-bold text-slate-700 not-italic tracking-tight">{label}</td>
+        <td className="px-8 py-5 text-slate-600 font-medium">{value}</td>
+        <td className="px-8 py-5 text-slate-400 text-xs font-bold hidden sm:table-cell">{context}</td>
+    </tr>
+);
+
+const Info = ({ className, size }: { className?: string, size?: number }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
         <circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" />
     </svg>
 );
