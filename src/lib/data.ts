@@ -35,4 +35,25 @@ export const countries: Country[] = [
         capital: "Buenos Aires",
         incomeLevel: "Upper Middle Income",
     },
+    {
+        id: "BRA",
+        name: "Brazil",
+        region: "South America",
+        capital: "Brasília",
+        incomeLevel: "Upper Middle Income",
+    },
+    {
+        id: "CAN",
+        name: "Canada",
+        region: "North America",
+        capital: "Ottawa",
+        incomeLevel: "High Income",
+    },
+    {
+        id: "ISR",
+        name: "Israel",
+        region: "Middle East",
+        capital: "Jerusalem",
+        incomeLevel: "High Income",
+    },
 ];
